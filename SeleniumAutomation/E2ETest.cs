@@ -12,21 +12,28 @@ namespace SeleniumAutomation
 {
     internal class E2ETest
     {
-        IWebDriver driver;//making it global variable so that everymethod can access it
+        public IWebDriver driver; // Global variable
 
         [SetUp]
         public void InvokeBrowser()
         {
-            new WebDriverManager.DriverManager().SetUpDriver(new ChromeConfig());
-            driver = new ChromeDriver();
+            // Create ChromeOptions and add incognito argument
+            ChromeOptions options = new ChromeOptions();
+            options.AddArgument("--incognito");
+
+            // Initialize ChromeDriver with options
+            driver = new ChromeDriver(options);
+            driver.Url = "https://rahulshettyacademy.com/loginpagePractise/";
+            // Set timeouts and maximize window
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
-            driver.Manage().Window.Maximize();           
+            driver.Manage().Window.Maximize();
         }
+
+
         [Test]
         public void E2EWorkflow()
         {
             string[]ExpectedProducts = { "Blackberry", "Nokia Edge" };
-            driver.Url = "https://rahulshettyacademy.com/loginpagePractise/";
             IWebElement Username = driver.FindElement(By.Id("username"));
             IWebElement Password = driver.FindElement(By.Name("password"));
             Username.SendKeys("rahulshettyacademy");
@@ -41,15 +48,17 @@ namespace SeleniumAutomation
             foreach(IWebElement product in products)
             {
                 
-                if (ExpectedProducts.Contains(product.FindElement(By.CssSelector(".card-title a")).Text) || ExpectedProducts.Contains(product.FindElement(By.CssSelector("h4.card-title")).Text))
+                if (ExpectedProducts.Contains(product.FindElement(By.CssSelector(".card-title a")).Text))
                 {
                     //This will click on the add to cart button of the product
                     product.FindElement(By.CssSelector(".card-footer button")).Click();
-                  
                 }
+                TestContext.WriteLine(product.FindElement(By.CssSelector(".card-title a")).Text);
             }
+            //Assert.AreEqual(ExpectedProducts, products);
             //Click on the checkout button
-            driver.FindElement(By.PartialLinkText("Checkout")).Click();
+            driver.FindElement(By.CssSelector("a.nav-link.btn.btn-primary")).Click();
+            driver.FindElement(By.CssSelector("button.btn.btn-success")).Click();
 
 
         }
